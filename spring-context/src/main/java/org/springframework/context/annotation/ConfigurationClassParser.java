@@ -263,7 +263,9 @@ class ConfigurationClassParser {
 		SourceClass sourceClass = null;
 		try {
 			sourceClass = asSourceClass(configClass, filter);
+			//do while 是为了解决有父类的情况
 			do {
+				//执行解析
 				sourceClass = doProcessConfigurationClass(configClass, sourceClass, filter);
 			}
 			while (sourceClass != null);
@@ -299,6 +301,7 @@ class ConfigurationClassParser {
 				sourceClass.getMetadata(), org.springframework.context.annotation.PropertySource.class,
 				PropertySources.class, true)) {
 			if (this.propertySourceRegistry != null) {
+				//将@PropertySources中定义的属性放到enviorment
 				this.propertySourceRegistry.processPropertySource(propertySource);
 			}
 			else {
@@ -336,6 +339,7 @@ class ConfigurationClassParser {
 					if (bdCand == null) {
 						bdCand = holder.getBeanDefinition();
 					}
+					//扫描拿到BeanDefinition，并对BeanDefinition扫描找到定义的配置类
 					if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
 						parse(bdCand.getBeanClassName(), holder.getBeanName());
 					}
@@ -368,6 +372,7 @@ class ConfigurationClassParser {
 		}
 
 		// Process default methods on interfaces
+		// 处理实现了接口且接口中有默认实现的方法的配置类
 		processInterfaces(configClass, sourceClass);
 
 		// Process superclass, if any
@@ -600,6 +605,7 @@ class ConfigurationClassParser {
 						// process it as an @Configuration class
 						this.importStack.registerImport(
 								currentSourceClass.getMetadata(), candidate.getMetadata().getClassName());
+						//如果没有实现接口，则导入的类充当配置类解析
 						processConfigurationClass(candidate.asConfigClass(configClass), filter);
 					}
 				}

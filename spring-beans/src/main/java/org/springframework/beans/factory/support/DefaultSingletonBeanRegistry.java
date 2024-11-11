@@ -202,6 +202,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					// Avoid early singleton inference outside of original creation thread.
 					return null;
 				}
+				// 因为在第一次检查和获取锁之间，可能有其他线程已经完成了Bean的创建并将其放入了一级缓存。
+				// 通过再次检查一级缓存，可以确保Bean不是在等待锁的时候被创建的。如果一级缓存中仍然没有Bean，
+				// 那么会继续检查二级缓存earlySingletonObjects。
 				try {
 					// Consistent creation of early reference within full singleton lock.
 					singletonObject = this.singletonObjects.get(beanName);
@@ -212,7 +215,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 							if (singletonFactory != null) {
 								singletonObject = singletonFactory.getObject();
 								// Singleton could have been added or removed in the meantime.
+								// 删除三级缓存中的该Bean，防止该Bean影响后面的线程对Bean的处理
 								if (this.singletonFactories.remove(beanName) != null) {
+									// 将三级缓存的结果放到二级缓存中
 									this.earlySingletonObjects.put(beanName, singletonObject);
 								}
 								else {

@@ -441,7 +441,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 						throw new IllegalStateException("@Resource annotation is not supported on static fields");
 					}
 					if (!this.ignoredResourceTypes.contains(field.getType().getName())) {
-						currElements.add(new ResourceElement(field, field, null));
+						currElements.add(new ement(field, field, null));
 					}
 				}
 				else if (javaxResourceType != null && field.isAnnotationPresent(javaxResourceType)) {
@@ -594,8 +594,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		String name = element.name;
 
 		if (factory instanceof AutowireCapableBeanFactory autowireCapableBeanFactory) {
+			//element.isDefaultName ： 是否采用了默认的名称
+			//没指定的话就直接用name属性到BeanFactory中尝试获取Bean
 			if (this.fallbackToDefaultTypeMatch && element.isDefaultName && !factory.containsBean(name)) {
 				autowiredBeanNames = new LinkedHashSet<>();
+				//如果Bean 根据Name找不到了，那就通过下面的方法byType找
 				resource = autowireCapableBeanFactory.resolveDependency(
 						element.getDependencyDescriptor(), requestingBeanName, autowiredBeanNames, null);
 				if (resource == null) {
@@ -608,6 +611,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			}
 		}
 		else {
+			//如果这里BeanFactory中有对应名称的Bean，则直接getBean了
+			//但是这里也说明了，如果我们显式的设置name，那就会跳过byType匹配了，如果拿不到Bean也不会再根据Type匹配了
 			resource = factory.getBean(name, element.lookupType);
 			autowiredBeanNames = Collections.singleton(name);
 		}
@@ -703,7 +708,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		private final boolean lazyLookup;
 
-		public ResourceElement(Member member, AnnotatedElement ae, @Nullable PropertyDescriptor pd) {
+		public ResourceElement(Member member, AnnoResourceEltatedElement ae, @Nullable PropertyDescriptor pd) {
 			super(member, pd);
 			jakarta.annotation.Resource resource = ae.getAnnotation(jakarta.annotation.Resource.class);
 			String resourceName = resource.name();

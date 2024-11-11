@@ -82,6 +82,7 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 			interceptors.add(methodInterceptor);
 		}
 		for (AdvisorAdapter adapter : this.adapters) {
+			//做适配的流程
 			if (adapter.supportsAdvice(advice)) {
 				interceptors.add(adapter.getInterceptor(advisor));
 			}

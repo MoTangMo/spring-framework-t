@@ -129,6 +129,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	/** Whether to automatically try to resolve circular references between beans. */
+	//标志是否支持循环依赖-默认是支持
 	private boolean allowCircularReferences = true;
 
 	/**
@@ -582,8 +583,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 
-		// Eagerly cache singletons to be able to resolve circular references
-		// even when triggered by lifecycle interfaces like BeanFactoryAware.
+//		1. 判断是否是单例，如果不是单例的话不支持依赖循环，因为Spring解决依赖循环是需要到缓存中获取的，如果是原型的话，那就直接创建Bean了，就回到了依赖循环BUG那边了
+//		2. allowCircularReferences 看开发者是否选择了支持依赖循环，默认是支持的
+//		3.isSingletonCurrentlyInCreation 判断该单例Bean是否在创建中
 		boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences &&
 				isSingletonCurrentlyInCreation(beanName));
 		if (earlySingletonExposure) {
@@ -591,6 +593,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				logger.trace("Eagerly caching bean '" + beanName +
 						"' to allow for resolving potential circular references");
 			}
+			//往三级缓存中添加getEarlyBeanReference 的Lambda表达式，后面会取出来用
 			addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
 		}
 

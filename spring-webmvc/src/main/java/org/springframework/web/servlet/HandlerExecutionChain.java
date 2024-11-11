@@ -120,7 +120,11 @@ public class HandlerExecutionChain {
 	 */
 	@Nullable
 	public HandlerInterceptor[] getInterceptors() {
-		return (!this.interceptorList.isEmpty() ? this.interceptorList.toArray(new HandlerInterceptor[0]) : null);
+		return (!this.interceptorList.isEmpty()
+				?
+				this.interceptorList.toArray(new HandlerInterceptor[0])
+				:
+				null);
 	}
 
 	/**

@@ -142,13 +142,18 @@ public abstract class ConfigurationClassUtils {
 				return false;
 			}
 		}
-
+		//主要是要是看Bean上是否有Configuration注解
 		Map<String, Object> config = metadata.getAnnotationAttributes(Configuration.class.getName());
 		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
+			//有并且proxyBeanMethods为true的情况，默认该属性为true，表示该配置类为FULL
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
+//		isConfigurationCandidate判断是否是LITE配置类，有4中判断方式
+//		1.有@Component @ComponentScan @Import @ImportResource @Bean 注解
+//		2.接口不算
 		else if (config != null || Boolean.TRUE.equals(beanDef.getAttribute(CANDIDATE_ATTRIBUTE)) ||
 				isConfigurationCandidate(metadata)) {
+			//表示该配置类为LITE
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
 		else {
@@ -178,6 +183,7 @@ public abstract class ConfigurationClassUtils {
 		}
 
 		// Any of the typical annotations found?
+		// 只要有Component注解，ComponentScan注解，Import注解，ImportResource注解，则给通过
 		for (String indicator : candidateIndicators) {
 			if (metadata.isAnnotated(indicator)) {
 				return true;
